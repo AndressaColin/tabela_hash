@@ -48,5 +48,3 @@ int main(){
     imprimirVetor(vetor, TAM);
     return 0;
 }down
-//# tabela_hash
-//Estudos, tipos
