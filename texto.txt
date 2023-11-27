@@ -1,110 +1,211 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-#define TAM 50
-
 /*
-    3 algoritmos de ordenaÁ„o b·sicos
-    ordenando de forma descrecente
-    vetor aleatÛrios de caracteres
+Programa que cria e ordena vetores de caracteres de forma decrescente
+Basta descomentar a chamada do algoritmo desejado (Merge, Quick, Heap, Qsort)
+Algoritmos e ProgramaÁ„o II
+2023, Prof. Rafael Canteri
 */
 
-void preencher_vetor(char vet[], int tam) {
-    srand(time(NULL));
-    int i;
-    for (i = 0; i < tam; i++) {
-        vet[i] = (char) (33 + rand() % 94);
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define TAM 26
+
+void preencher_vetor(char v[], int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        //v[i] = 65 + (rand() % 26); // AleatÛrio
+        //v[i] = 90 - i; // AlfabÈtica normal
+        v[i] = 65 + i; // AlfabÈtica inversa
     }
 }
 
-void imprimir_vetor(char vet[], int tam) {
-    int i;
-    for (i = 0; i < tam; i++) {
-        printf("%c\t", vet[i]);
+void imprimir_vetor(char v[], int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        printf("%c  ", v[i]);
     }
 }
 
-void bubble_sort(char vet[], int tam) {
-    int i, j;
+void cria_heap(char v[], int pai, int fim) {
+    int filho;
     char aux;
-    for (i = 0; i < tam - 1; i++) {
-        // PERCORRE O VETOR TODO, ENXUGANDO A CADA VEZ
-        for (j = 0; j < tam - 1 - i; j++) {
-            // VERIFICA QUEM … MAIOR
-            if (vet[j] < vet[j + 1]) {
-                // TROCA
-                aux = vet[j];
-                vet[j] = vet[j + 1];
-                vet[j + 1] = aux;
+    filho = 2 * pai + 1;
+    aux = v[pai];
+    while (filho <= fim) {
+        if (filho < fim) { // Se tem irm„o
+            if (v[filho] > v[filho + 1]) { // Qual o menor dos irm„os (decrescente)
+                filho = filho + 1;
+            }
+        }
+        if (aux > v[filho]) { // Pai tem que ser menor que os filhos (descrescente)
+            v[pai] = v[filho];
+            pai = filho;
+            filho = 2 * pai + 1;
+        }
+        else {
+            filho = fim + 1;
+        }
+    }
+    v[pai] = aux; // Coloca no ˙ltimo filho o valor do pai "original"
+}
+
+void heap_sort(char v[], int tamanho) {
+    char aux;
+    for (int i = (tamanho - 1) / 2; i >= 0; i--) {
+        cria_heap(v, i, tamanho - 1);
+    }
+    for (int i = tamanho - 1; i > 0; i--) {
+        // Pega a raiz da Heap, coloca na ˙ltima posiÁ„o e esquece l·
+        aux = v[0];
+        v[0] = v[i];
+        v[i] = aux;
+        cria_heap(v, 0, i - 1); // Cria o MAX_HEAP (ou MIN, se decrescente)
+    }
+}
+
+void quick_sort(char v[], int inicio, int fim) {
+    int esq, dir;
+    char pivo;
+    char aux;
+    esq = inicio;
+    dir = fim;
+    /* PIV‘ ELEMENTO DO MEIO */
+    //pivo = v[(inicio + fim) / 2];
+    /* PIV‘ ELEMENTO DO INÕCIO */
+    //pivo = v[inicio];
+    /* PIV‘ ELEMENTO DO FIM */
+    pivo = v[fim];
+    while (esq <= dir) { // Enquanto n„o cruzou
+        while (v[esq] > pivo && esq < fim) { // Caminha com o esquerda
+            esq++;
+        }
+        while (v[dir] < pivo && dir > inicio) { // Caminha com o direita
+            dir--;
+        }
+        if (esq <= dir) {
+            // Troca os elementos de esquerda com direita se tiverem "batido na parede"
+            aux = v[esq];
+            v[esq] = v[dir];
+            v[dir] = aux;
+            esq++;
+            dir--;
+        }
+    }
+    if (dir > inicio) {
+        quick_sort(v, inicio, dir); // Partition para segmento da esquerda
+    }
+    if (esq < fim) {
+        quick_sort(v, esq, fim); // Partition para segmento da direita
+    }
+}
+
+void merge(char v[], int inicio, int meio, int fim) {
+    char *vetorTemp;
+    int tamanho;
+    int indice_esq, indice_dir;
+    int fim1, fim2;
+    int i, j;
+    fim1 = 0;
+    fim2 = 0;
+    tamanho = fim - inicio + 1;
+    indice_esq = inicio;
+    indice_dir = meio + 1;
+    vetorTemp = (char*) calloc(tamanho, sizeof(char));
+    if (vetorTemp == NULL) {
+        puts("Impossivel alocar a memoria!");
+        return;
+    }
+    for (i = 0; i < tamanho; i++) {
+        if (!fim1 && !fim2) {
+            if (v[indice_esq] > v[indice_dir]) {
+                vetorTemp[i] = v[indice_esq];
+                indice_esq++;
+            }
+            else {
+                vetorTemp[i] = v[indice_dir];
+                indice_dir++;
+            }
+            if (indice_esq > meio) {
+                fim1 = 1; // Final do esquerda
+            }
+            if (indice_dir > fim) {
+                fim2 = 1; // Final do direita
+            }
+        }
+        else {
+            if (!fim1) {
+                vetorTemp[i] = v[indice_esq];
+                indice_esq++;
+            }
+            else {
+                vetorTemp[i] = v[indice_dir];
+                indice_dir++;
             }
         }
     }
-
+    for (j = 0, i = inicio; j < tamanho; j++, i++) {
+        v[i] = vetorTemp[j];
+    }
+    free(vetorTemp);
 }
 
-void insertion_sort(char vet[], int tam) {
-    int i, j;
-    char aux;
-    // AVAN«A PARA DIREITA E SELECIONA N⁄MERO
-    for (i = 1; i < tam; i++) {
-        aux = vet[i];
-        // PERCORRE O SUBVETOR DA ESQUERDA
-        for (j = i; j > 0 &&  aux > vet[j - 1]; j--)  {
-            // EMPURRA OS ELEMENTOS
-            vet[j] = vet[j - 1];
-
-        }
-        // COLOCA O ELEMENTO NA POSI«√O DEVIDA
-        vet[j] = aux;
+void merge_sort(char v[], int inicio, int fim) {
+    int meio;
+    if (inicio < fim) {
+        meio = floor((inicio + fim)/2);
+        merge_sort(v, inicio, meio);
+        merge_sort(v, meio + 1, fim);
+        merge(v, inicio, meio, fim);
     }
 }
 
-void selection_sort(char vet[], int tam) {
-    int i, j;
-    char aux;
-    int menor;
-    // PERCORRE O VETOR PARA A DIREITA
-    for (i = 0; i < tam - 1; i++) {
-        menor = i;
-        // PERCORRE O VETOR ENXUGADO PARA A DIREITA
-        for (j = i + 1; j <= tam - 1; j++) {
-            if (vet[j] > vet[menor]) {
-                // GUARDA A POSI«√O DO MENOR ELEMENTO
-                menor = j;
-            }
-        }
-        // TROCA O MENOR ELEMENTO COM O PRIMEIRO
-        if (i != menor) {
-            aux = vet[i];
-            vet[i] = vet[menor];
-            vet[menor] = aux;
-        }
-    }
+int comparadorCaractere(const void *px, const void *py) {
+    char x, y;
+    x = *(char *)px; // Convers„o e derreferenciaÁ„o
+    y = *(char *)py; // Convers„o e derreferenciaÁ„o
+
+    //return x - y; // OrdenaÁ„o Crescente
+    return y - x; // OrdenaÁ„o Decrescente
+    /* POSSÕVEIS RETORNOS DA FUN«√O:
+     - Se negativo: px antes de py
+     - Se 0: os dois s„o iguais
+     - Se positivo: py antes de px
+    */
 }
 
-int main()
-{
-    char vet[TAM], vet2[TAM], vet3[TAM];
+int comparadorInteiro(const void *px, const void *py) {
+    int x, y;
+    x = *(int *)px; // Convers„o e derreferenciaÁ„o
+    y = *(int *)py; // Convers„o e derreferenciaÁ„o
+
+    return x - y; // OrdenaÁ„o Crescente
+    //return y - x; // OrdenaÁ„o Decrescente
+    /* POSSÕVEIS RETORNOS DA FUN«√O:
+     - Se negativo: px antes de py
+     - Se 0: os dois s„o iguais
+     - Se positivo: py antes de px
+    */
+}
+
+int main() {
+    int vet[TAM];
     preencher_vetor(vet, TAM);
-    puts("Vetor original:");
+    puts("VETOR ORIGINAL:");
     imprimir_vetor(vet, TAM);
-    bubble_sort(vet, TAM);
-    puts("Vetor ordenado:");
+
+    /*OrdenaÁ„o com Heap Sort*/
+    //heap_sort(vet, TAM);
+
+    /*OrdenaÁ„o com Quick Sort*/
+    //quick_sort(vet, 0, TAM - 1);
+
+    /*OrdenaÁ„o com Merge Sort*/
+    //merge_sort(vet, 0, TAM - 1);
+
+    /*OrdenaÁ„o com qsort()*/
+    //qsort(vet, TAM, sizeof(char), comparadorCaractere);
+    //qsort(vet, TAM, sizeof(int), comparadorInteiro); // Se fosse um vetor de inteiros (FunÁ„o comparador diferente)
+
+    puts("\nVETOR ORDENADO:");
     imprimir_vetor(vet, TAM);
-    // ============================== //
-    preencher_vetor(vet2, TAM);
-    puts("Vetor original:");
-    imprimir_vetor(vet2, TAM);
-    insertion_sort(vet2, TAM);
-    puts("Vetor ordenado:");
-    imprimir_vetor(vet2, TAM);
-    // ============================== //
-    preencher_vetor(vet3, TAM);
-    puts("Vetor original:");
-    imprimir_vetor(vet3, TAM);
-    selection_sort(vet3, TAM);
-    puts("Vetor ordenado:");
-    imprimir_vetor(vet3, TAM);
     return 0;
 }

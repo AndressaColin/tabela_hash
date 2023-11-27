@@ -25,7 +25,7 @@ void bubbleSort(char vetor[], int tamanho){
     int i, j;
     char aux;
     for(i = 0; i < tamanho - 1; i++){
-        for(j = 0; j < tamanho - i - 1; i++){
+        for(j = 0; j < tamanho - i - 1; j++){
             if(vetor[j] < vetor[j + 1]){
                 aux = vetor[j];
                 vetor[j] = vetor[j + 1];
