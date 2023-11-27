@@ -1,114 +1,110 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <time.h>
 
-//DefiniÁ„o do tipo Hash
-struct hash{
-    int quantidade, tamanho;
-    int **itens;
-};
+#define TAM 50
 
-typedef struct hash Hash;
+/*
+    3 algoritmos de ordenaÁ„o b·sicos
+    ordenando de forma descrecente
+    vetor aleatÛrios de caracteres
+*/
 
-Hash* criaHash(int tamanho);
-void liberaHash(Hash* ha);
-int insereHash_SemColisao(Hash* ha, int elemento);
-int buscaHash_SemColisao(Hash* ha, int mat, int *elemento);
-
-
-Hash* criaHash(int tamanho){
-    Hash* ha = (Hash*) malloc(sizeof(Hash));
-    if(ha != NULL){
-        int i;
-        ha->tamanho = tamanho;
-        ha->itens = (int**) malloc(tamanho * sizeof(int*));
-        if(ha->itens == NULL){
-            free(ha);
-            return NULL;
-        }
-        ha->quantidade = 0;
-        for(i=0; i < ha->tamanho; i++)
-            ha->itens[i] = NULL;
-    }
-    return ha;
-}
-
-void liberaHash(Hash* ha){
-    if(ha != NULL){
-        int i;
-        for(i=0; i < ha->tamanho; i++){
-            if(ha->itens[i] != NULL)
-                free(ha->itens[i]);
-        }
-        free(ha->itens);
-        free(ha);
-    }
-}
-
-//Hash Divisao
-//pos = chaveDivisao(chave, tamanho)
-int chaveDivisao(int chave, int tamanho){
-    return (chave & 0x7FFFFFFF) % tamanho;
-}
-
-//==============================================
-// Insere e busca sem tratamento de colis„o
-//==============================================
-int insereHash_SemColisao(Hash* ha, int elemento){
-    if(ha == NULL || ha->quantidade == ha->tamanho)
-        return 0;
-
-    int chave = elemento;
-
-    int pos = chaveDivisao(chave, ha->tamanho);
-    int* novo;
-    novo = (int*) malloc(sizeof(int));
-    if(novo == NULL)
-        return 0;
-    *novo = elemento;
-    ha->itens[pos] = novo;
-    ha->quantidade++;
-    return 1;
-}
-
-int buscaHash_SemColisao(Hash* ha, int mat, int *elemento){
-    if(ha == NULL)
-        return 0;
-
-    int pos = chaveDivisao(mat, ha->tamanho);
-    if(ha->itens[pos] == NULL)
-        return 0;
-    *elemento = *(ha->itens[pos]);
-    return 1;
-}
-
-int main(){
-    int tamanho = 1024;
-    Hash *tabela = criaHash(tamanho);
-
-    int elementoBusca, elementos [4] = {12352, 7894, 3451, 5293}; //64, 726, 379, 173
-
+void preencher_vetor(char vet[], int tam) {
+    srand(time(NULL));
     int i;
+    for (i = 0; i < tam; i++) {
+        vet[i] = (char) (33 + rand() % 94);
+    }
+}
 
-    printf("Inserindo Elementos\n");
+void imprimir_vetor(char vet[], int tam) {
+    int i;
+    for (i = 0; i < tam; i++) {
+        printf("%c\t", vet[i]);
+    }
+}
 
-    for(i=0; i < 4; i++) {
-        printf("%d\n", elementos[i]);
-        insereHash_SemColisao(tabela, elementos[i]);
+void bubble_sort(char vet[], int tam) {
+    int i, j;
+    char aux;
+    for (i = 0; i < tam - 1; i++) {
+        // PERCORRE O VETOR TODO, ENXUGANDO A CADA VEZ
+        for (j = 0; j < tam - 1 - i; j++) {
+            // VERIFICA QUEM … MAIOR
+            if (vet[j] < vet[j + 1]) {
+                // TROCA
+                aux = vet[j];
+                vet[j] = vet[j + 1];
+                vet[j + 1] = aux;
+            }
+        }
     }
 
-    printf("Elementos Buscados\n");
+}
 
-    buscaHash_SemColisao(tabela, 12352, &elementoBusca);
-    printf("%d\n", elementoBusca);
+void insertion_sort(char vet[], int tam) {
+    int i, j;
+    char aux;
+    // AVAN«A PARA DIREITA E SELECIONA N⁄MERO
+    for (i = 1; i < tam; i++) {
+        aux = vet[i];
+        // PERCORRE O SUBVETOR DA ESQUERDA
+        for (j = i; j > 0 &&  aux > vet[j - 1]; j--)  {
+            // EMPURRA OS ELEMENTOS
+            vet[j] = vet[j - 1];
 
-    buscaHash_SemColisao(tabela, 3451, &elementoBusca);
-    printf("%d\n", elementoBusca);
+        }
+        // COLOCA O ELEMENTO NA POSI«√O DEVIDA
+        vet[j] = aux;
+    }
+}
 
-    buscaHash_SemColisao(tabela, 5293, &elementoBusca);
-    printf("%d\n", elementoBusca);
+void selection_sort(char vet[], int tam) {
+    int i, j;
+    char aux;
+    int menor;
+    // PERCORRE O VETOR PARA A DIREITA
+    for (i = 0; i < tam - 1; i++) {
+        menor = i;
+        // PERCORRE O VETOR ENXUGADO PARA A DIREITA
+        for (j = i + 1; j <= tam - 1; j++) {
+            if (vet[j] > vet[menor]) {
+                // GUARDA A POSI«√O DO MENOR ELEMENTO
+                menor = j;
+            }
+        }
+        // TROCA O MENOR ELEMENTO COM O PRIMEIRO
+        if (i != menor) {
+            aux = vet[i];
+            vet[i] = vet[menor];
+            vet[menor] = aux;
+        }
+    }
+}
 
-    liberaHash(tabela);
-
+int main()
+{
+    char vet[TAM], vet2[TAM], vet3[TAM];
+    preencher_vetor(vet, TAM);
+    puts("Vetor original:");
+    imprimir_vetor(vet, TAM);
+    bubble_sort(vet, TAM);
+    puts("Vetor ordenado:");
+    imprimir_vetor(vet, TAM);
+    // ============================== //
+    preencher_vetor(vet2, TAM);
+    puts("Vetor original:");
+    imprimir_vetor(vet2, TAM);
+    insertion_sort(vet2, TAM);
+    puts("Vetor ordenado:");
+    imprimir_vetor(vet2, TAM);
+    // ============================== //
+    preencher_vetor(vet3, TAM);
+    puts("Vetor original:");
+    imprimir_vetor(vet3, TAM);
+    selection_sort(vet3, TAM);
+    puts("Vetor ordenado:");
+    imprimir_vetor(vet3, TAM);
     return 0;
 }
