@@ -62,11 +62,46 @@ int insereHash_semcColisao(Hash* h, int elemento){
     novo = (int*) malloc(sizeof(int)); //aloca memoria
     if(novo == NULL)
         return 0;
-    
     *novo = elemento;
-
+    h -> itens[pos] = novo; 
+    h -> quantidade;
+    return 1;
 }
+
+int buscaHashe_semColisao(Hash* h, int mat, int *elemento){
+    if(h == NULL)
+        return 0;
+
+    int pos = chaveDivisao(mat, h -> tamanho);
+    if(h -> itens[pos] == NULL)
+        return 0;
+    *elemento = *(h -> itens[pos]);
+    return 1;
+}
+
 int main(){
+    int tamanho = 1024;
+    Hash* tabela = criaHash(tamanho);
+
+    int elementoBusca, elementos[4] = {12352, 7894, 3451, 5293};
+    int i;
+    printf("Inserindo Elementos\n");
+    for(i = 0; i < 4; i++){
+        printf("%d\n", elementos[i]);
+        insereHash_semcColisao(tabela, elementos[i]);
+    }
+     printf("Elementos Buscados\n");
+
+     buscaHash_semColisao(tabela, 12352, &elementoBusca);
+     printf("%d\n", elementoBusca);
+
+     buscaHash_semColisao(tabela, 3451, &elementoBusca);
+     printf("%d\n", elementoBusca);
+
+      buscaHash_semColisao(tabela, 5293, &elementoBusca);
+     printf("%d\n", elementoBusca);
+    
+    liberaHash(tabela);
 
     return 0;
 }
